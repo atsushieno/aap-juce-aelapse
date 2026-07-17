@@ -1,29 +1,19 @@
 PWD=$(shell pwd)
 AAP_JUCE_DIR=$(PWD)/external/aap-juce
 
-APP_NAME=aelapse
+APP_NAME=Aelapse
 
 APP_BUILD_DIR=$(PWD)
 APP_SRC_DIR=$(PWD)/external/aelapse
-JUCE_DIR=$(APP_SRC_DIR)/modules/juce
+# Upstream fetches JUCE via CMake FetchContent; aap-juce-support.patch
+# rewrites that to CPMAddPackage, which applies all the JUCE patches as part
+# of the population (into CPM_SOURCE_CACHE, passed by app/build.gradle).
+BUILD_USES_FETCHCONTENT=1
 
 # For metadata updates, relative to build-desktop
 APP_SHARED_CODE_LIBS="$(APP_NAME)_artefacts/lib$(APP_NAME)_SharedCode.a"
 
-# Populate aap-juce-support.patch with upstream changes required for AAP,
-# then uncomment the following two lines to have `make` apply it automatically.
 PATCH_FILE=$(PWD)/aap-juce-support.patch
 PATCH_DEPTH=1
-
-# JUCE patches if any
-JUCE_PATCHES= \
-	$(AAP_JUCE_DIR)/juce-patches/7.0.6/export-jni-symbols.patch \
-	$(AAP_JUCE_DIR)/juce-patches/7.0.6/disable-detach-current-thread.patch \
-	$(AAP_JUCE_DIR)/juce-patches/7.0.6/support-plugin-ui.patch \
-	$(AAP_JUCE_DIR)/juce-patches/7.0.11/embedded-peer-window-guard.patch \
-	$(AAP_JUCE_DIR)/juce-patches/7.0.11/juce-component-peer-view-touch.patch \
-	$(AAP_JUCE_DIR)/juce-patches/7.0.11/popup-menu-android.patch \
-
-JUCE_PATCH_DEPTH=1
 
 include $(AAP_JUCE_DIR)/Makefile.cmake-common

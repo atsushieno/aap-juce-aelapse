@@ -3,6 +3,8 @@ plugins {
     id 'kotlin-android'
 }
 
+var cpmSourceCacheDir = System.getenv("HOME") + "/.cache/CPM/uapmd"
+
 android {
     namespace "org.androidaudioplugin.ports.juce.aelapse"
     compileSdk = libs.versions.android.compileSdk.get().toInteger()
@@ -17,6 +19,7 @@ android {
             cmake {
                 arguments "-DAAP_DIR=${System.env.AAP_DIR != null ? System.env.AAP_DIR : "$projectDir/../external/aap-core"}",
                         "-DAAP_JUCE_DIR=${System.env.AAP_JUCE_DIR != null ? System.env.AAP_JUCE_DIR : "$projectDir/../external/aap-juce"}",
+                        "-DCPM_SOURCE_CACHE=${cpmSourceCacheDir}",
                         "-DCMAKE_BUILD_TYPE=RelWithDebInfo", "-DANDROID_STL=c++_shared", "-DANDROID_CPP_FEATURES=exceptions rtti", "-DANDROID_ARM_NEON=ON"
             }
         }
@@ -31,6 +34,9 @@ android {
     }
 
     sourceSets {
+        // external/aelapse/modules/juce is a symlink to the patched JUCE
+        // tree, created at CMake configuration time (see the CPMAddPackage
+        // section that aap-juce-support.patch adds to its CMakeLists.txt).
         main.java.srcDirs +=
             ["../external/aelapse/modules/juce/modules/juce_gui_basics/native/java/app",
              "../external/aelapse/modules/juce/modules/juce_gui_basics/native/javaopt/app",
@@ -62,5 +68,17 @@ android {
     ndkVersion libs.versions.ndk.get()
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+}
+
+// The JUCE Java sources (srcDirs above) only exist after the CMake configure
+// step created the modules/juce symlink; AGP does not order javac/lint after
+// native configuration by itself.
+afterEvaluate {
+    def configureCMakeTasks = tasks.matching { it.name.startsWith("configureCMake") }
+    tasks.matching {
+        it.name.matches("compile.*JavaWithJavac") || it.name.startsWith("lintAnalyze") || it.name.startsWith("lintVitalAnalyze")
+    }.configureEach {
+        dependsOn configureCMakeTasks
     }
 }
