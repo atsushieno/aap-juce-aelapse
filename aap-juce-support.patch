@@ -8,7 +8,7 @@ index ddcebc9..dafa9c2 100644
  .cache/
 +modules/juce
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 7123520..9894d6d 100644
+index 7123520..832ec3b 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,29 +1,29 @@
@@ -70,45 +70,12 @@ index 7123520..9894d6d 100644
  include(CTest)
  option(BUILD_TESTING "Build tests" ON)
  if (BUILD_TESTING)
-@@ -103,3 +107,38 @@ target_link_libraries(${PROJECT_NAME}
+@@ -103,3 +107,5 @@ target_link_libraries(${PROJECT_NAME}
          juce::juce_recommended_config_flags
          juce::juce_recommended_warning_flags
      )
 +
-+# begin AAP specifics -->
-+
-+juce_add_modules(${AAP_JUCE_DIR}/aap-modules/aap_audio_processors)
-+
-+# They are needed in desktop builds too, for generate-aap-metadata.
-+target_include_directories(${PROJECT_NAME} PUBLIC
-+        "${AAP_DIR}/include"
-+        "${AAP_JUCE_DIR}/aap-modules"
-+)
-+
-+target_compile_definitions(${PROJECT_NAME} PUBLIC
-+        JUCEAAP_HAVE_AUDIO_PLAYHEAD_NEW_POSITION_INFO=1
-+        JUCE_PUSH_NOTIFICATIONS=1
-+        JUCE_PUSH_NOTIFICATIONS_ACTIVITY="com/rmsl/juce/JuceActivity"
-+)
-+
-+message("AAP_DIR: ${AAP_DIR}")
-+message("AAP_JUCE_DIR: ${AAP_JUCE_DIR}")
-+
-+if (ANDROID)
-+    add_compile_definitions(
-+            [[JUCE_ANDROID=1]]
-+            [[JUCE_DONT_AUTO_OPEN_MIDI_DEVICES_ON_MOBILE=1]]
-+    )
-+
-+    find_package(androidaudioplugin REQUIRED CONFIG)
-+    target_link_libraries(${PROJECT_NAME} PRIVATE
-+            androidaudioplugin::androidaudioplugin
-+    )
-+endif (ANDROID)
-+
-+target_link_libraries(${PROJECT_NAME} PRIVATE aap_audio_processors)
-+
-+# <-- end AAP specifics
++aap_juce_plugin(TARGET ${PROJECT_NAME})
 diff --git a/src/GUI/SpringsGL.cpp b/src/GUI/SpringsGL.cpp
 index e259fb8..a2ce168 100644
 --- a/src/GUI/SpringsGL.cpp
