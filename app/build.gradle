@@ -17,7 +17,7 @@ android {
         externalNativeBuild {
             cmake {
                 arguments "-DCPM_SOURCE_CACHE=${cpmSourceCacheDir}",
-                        "-DCMAKE_BUILD_TYPE=RelWithDebInfo", "-DANDROID_STL=c++_shared", "-DANDROID_CPP_FEATURES=exceptions rtti", "-DANDROID_ARM_NEON=ON"
+                        "-DCMAKE_BUILD_TYPE=Release", "-DANDROID_STL=c++_shared", "-DANDROID_CPP_FEATURES=exceptions rtti", "-DANDROID_ARM_NEON=ON"
             }
         }
         proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
